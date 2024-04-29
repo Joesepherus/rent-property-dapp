@@ -13,6 +13,18 @@ contract RentPropertyTest is Test {
     function setUp() public {
         rentProperty = new RentProperty();
 
+        rentProperty.listPropertyForRent(
+            0,
+            "Lincoln Street 8",
+            "Washington",
+            "USA",
+            "Wonderful 3 bedroom property for rent."
+        );
+
+        RentProperty.Property memory _property = rentProperty.getPropertyById(
+            0
+        );
+
         rentProperty.createRentContract(
             firstContractId,
             lessorAddress,
@@ -23,7 +35,8 @@ contract RentPropertyTest is Test {
             30,
             1,
             2,
-            12
+            12,
+            _property.id
         );
         vm.prank(leaseAddress);
         rentProperty.signContract(0);

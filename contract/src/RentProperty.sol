@@ -7,6 +7,8 @@ contract RentProperty {
         string propertyAddress;
         string city;
         string country;
+        address owner;
+        string description;
     }
 
     struct Contract {
@@ -21,6 +23,7 @@ contract RentProperty {
         uint endDate;
         bool isActive;
         uint period;
+        Property property;
     }
 
     struct Payment {
@@ -29,6 +32,9 @@ contract RentProperty {
         bool paid;
         bool approved;
     }
+
+    mapping(uint => Property) properties;
+    uint public propertiesCount = 0;
 
     // contract id => signer address
     mapping(uint => mapping(address => bool)) public contractSignatures;
@@ -78,8 +84,11 @@ contract RentProperty {
         uint _gracePeriod,
         uint _startDate,
         uint _endDate,
-        uint _period
+        uint _period,
+        uint propertyId
     ) public {
+        Property storage property = properties[propertyId];
+
         Contract memory _contract = Contract(
             _id,
             _lessor,
@@ -91,7 +100,8 @@ contract RentProperty {
             _startDate,
             _endDate,
             false,
-            _period
+            _period,
+            property
         );
         contracts[contractCount] = _contract;
         createPaymentsForRentContract(
@@ -209,5 +219,31 @@ contract RentProperty {
 
         _contract.isActive = false;
         emit ContractTerminated(contractId, paymentId, _contract.lease, reason);
+    }
+
+    function listPropertyForRent(
+        uint _id,
+        string memory _propertyAddress,
+        string memory _city,
+        string memory _country,
+        string memory _description
+    ) public {
+        Property memory _property = Property(
+            _id,
+            _propertyAddress,
+            _city,
+            _country,
+            msg.sender,
+            _description
+        );
+        properties[propertiesCount] = _property;
+        propertiesCount++;
+    }
+
+    function getPropertyById(
+        uint propertyId
+    ) public view returns (Property memory) {
+        Property memory _property = properties[propertyId];
+        return _property;
     }
 }
