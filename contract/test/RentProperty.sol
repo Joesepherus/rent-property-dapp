@@ -6,16 +6,17 @@ import {RentProperty} from "../src/RentProperty.sol";
 
 contract RentPropertyTest is Test {
     RentProperty public rentProperty;
+    uint256 constant firstContractId = 0;
+    address constant lessorAddress = 0x70997970C51812dc3A010C7d01b50e0d17dc79C8;
+    address constant leaseAddress = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
 
     function setUp() public {
         rentProperty = new RentProperty();
-    }
 
-    function test_CreateRentContract() public {
         rentProperty.createRentContract(
-            0,
-            0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266,
-            0x70997970C51812dc3A010C7d01b50e0d17dc79C8,
+            firstContractId,
+            lessorAddress,
+            leaseAddress,
             500,
             1000,
             20,
@@ -24,6 +25,9 @@ contract RentPropertyTest is Test {
             2,
             12
         );
+    }
+
+    function test_CreateRentContract() public view {
         RentProperty.Contract memory _contract = rentProperty.getContractById(
             0
         );
@@ -34,19 +38,7 @@ contract RentPropertyTest is Test {
         assertEq(_contract.monthlyRent, 500);
     }
 
-    function test_paymentsCreated() public {
-        rentProperty.createRentContract(
-            0,
-            0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266,
-            0x70997970C51812dc3A010C7d01b50e0d17dc79C8,
-            500,
-            1000,
-            20,
-            30,
-            1,
-            2,
-            12
-        );
+    function test_paymentsCreated() public view {
         RentProperty.Contract memory _contract = rentProperty.getContractById(
             0
         );
@@ -56,7 +48,7 @@ contract RentPropertyTest is Test {
                 .getPaymentsByContractIdAndPaymentId(_contract.id, i);
             // assertEq(_payment.id, i);
             uint _dueDate = _contract.paymentDue * (i + 1);
-            assertEq(_payment.dueDate, _contract.startDate +  _dueDate);
+            assertEq(_payment.dueDate, _contract.startDate + _dueDate);
         }
     }
 }
