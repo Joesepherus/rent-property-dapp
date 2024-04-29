@@ -59,6 +59,15 @@ contract RentProperty {
         string reason
     );
 
+    event PropertyListedForRent(uint propertyId, address owner);
+
+    event RentApproved(uint contractId, uint paymentId);
+    event ContractSigned(uint contractId, address signer);
+    event ContractActivated(uint contractId);
+    event PaymentsForContractCreated(uint contractId);
+
+    event ContractCreated(uint contractId);
+
     function getContractById(
         uint contractId
     ) public view returns (Contract memory) {
@@ -104,6 +113,7 @@ contract RentProperty {
             property
         );
         contracts[contractCount] = _contract;
+        emit ContractCreated(_contract.id);
         createPaymentsForRentContract(
             _period,
             _startDate,
@@ -124,6 +134,7 @@ contract RentProperty {
             Payment memory _payment = createPayment(i, _startDate + _dueDate);
             payments[_contractId][i] = _payment;
         }
+        emit PaymentsForContractCreated(_contractId);
     }
 
     function createPayment(
@@ -145,11 +156,15 @@ contract RentProperty {
             "Contract is already signed by the signee."
         );
         contractSignatures[contractId][msg.sender] = true;
+
+        emit ContractSigned(contractId, msg.sender);
+
         if (
             contractSignatures[contractId][_contract.lessor] &&
             contractSignatures[contractId][_contract.lease]
         ) {
             _contract.isActive = true;
+            emit ContractActivated(contractId);
         }
     }
 
@@ -183,6 +198,7 @@ contract RentProperty {
             "Unauthorized access"
         );
         require(_contract.isActive, "Contract is not active.");
+
         for (uint i = 0; i < _contract.period; i++) {
             if (
                 !_payments[i].paid &&
@@ -197,17 +213,18 @@ contract RentProperty {
         }
     }
 
-    function approveRentReceived(uint contractId, uint paymentId) public {
-        Contract memory _contract = contracts[contractId];
+    function approveRentReceived(uint _contractId, uint _paymentId) public {
+        Contract memory _contract = contracts[_contractId];
         require(
             msg.sender == _contract.lessor,
             "Only lessor can approve rent being received."
         );
 
-        Payment storage _payment = payments[contractId][paymentId];
+        Payment storage _payment = payments[_contractId][_paymentId];
         require(!_payment.approved, "Payment is already approved.");
 
         _payment.approved = true;
+        emit RentApproved(_contractId, _paymentId);
     }
 
     function terminateContract(
@@ -238,6 +255,7 @@ contract RentProperty {
         );
         properties[propertiesCount] = _property;
         propertiesCount++;
+        emit PropertyListedForRent(_property.id, msg.sender);
     }
 
     function getPropertyById(
