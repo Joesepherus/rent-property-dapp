@@ -56,6 +56,14 @@ contract RentProperty {
         return _contract;
     }
 
+    function getPaymentsByContractIdAndPaymentId(
+        uint contractId,
+        uint paymentId
+    ) public view returns (Payment memory) {
+        Payment memory _payments = payments[contractId][paymentId];
+        return _payments;
+    }
+
     function createRentContract(
         uint _id,
         address _lessor,
@@ -82,7 +90,34 @@ contract RentProperty {
             _period
         );
         contracts[contractCount] = _contract;
+        createPaymentsForRentContract(
+            _period,
+            _startDate,
+            _paymentDue,
+            contractCount
+        );
         contractCount++;
+    }
+
+    function createPaymentsForRentContract(
+        uint _period,
+        uint _startDate,
+        uint _paymentDue,
+        uint _contractId
+    ) public {
+        for (uint i = 0; i < _period; i++) {
+            uint _dueDate = _paymentDue * (i + 1);
+            Payment memory _payment = createPayment(i, _startDate + _dueDate);
+            payments[_contractId][i] = _payment;
+        }
+    }
+
+    function createPayment(
+        uint _id,
+        uint _dueDate
+    ) public pure returns (Payment memory) {
+        Payment memory _payment = Payment(_id, _dueDate, false);
+        return _payment;
     }
 
     function payRent(uint contractId, uint paymentId) public payable {
