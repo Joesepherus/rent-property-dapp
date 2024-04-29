@@ -51,4 +51,14 @@ contract RentPropertyTest is Test {
             assertEq(_payment.dueDate, _contract.startDate + _dueDate);
         }
     }
+
+    function test_signContract() public {
+        vm.prank(leaseAddress);
+        rentProperty.signContract(0);
+
+        vm.prank(lessorAddress);
+        rentProperty.signContract(0);
+        bool signed = rentProperty.isContractSigned(0);
+        assertEq(signed, true);
+    }
 }

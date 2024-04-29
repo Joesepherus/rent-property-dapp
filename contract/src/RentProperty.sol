@@ -29,6 +29,9 @@ contract RentProperty {
         bool paid;
     }
 
+    // contract id => signer address
+    mapping(uint => mapping(address => bool)) public contractSignatures;
+
     mapping(uint => Contract) public contracts;
     // Contract id => contract payments id => payments
     // payments[contract_id][payments_id]
@@ -120,11 +123,31 @@ contract RentProperty {
         return _payment;
     }
 
+    function signContract(uint contractId) public {
+        Contract memory _contract = contracts[contractId];
+        require(
+            _contract.lessor == msg.sender || _contract.lease == msg.sender,
+            "Signer has to be either lessor or lease."
+        );
+        require(
+            !contractSignatures[contractId][msg.sender],
+            "Contract is already signed by the signee."
+        );
+        contractSignatures[contractId][msg.sender] = true;
+    }
+
+    function isContractSigned(uint contractId) public view returns (bool) {
+        Contract memory _contract = contracts[contractId];
+        return
+            contractSignatures[contractId][_contract.lessor] &&
+            contractSignatures[contractId][_contract.lease];
+    }
+
     function payRent(uint contractId, uint paymentId) public payable {
         Contract memory _contract = contracts[contractId];
 
         require(msg.sender == _contract.lease, "Only lease can pay rent.");
-        require(_contract.isActive, "Contact is not active.");
+        require(_contract.isActive, "Contract is not active.");
         require(msg.value == _contract.monthlyRent, "Incorrect rent value.");
 
         (bool sent, ) = _contract.lessor.call{value: msg.value}("");
