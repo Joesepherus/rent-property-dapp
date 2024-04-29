@@ -2,8 +2,6 @@
 pragma solidity ^0.8.13;
 
 contract RentProperty {
-    uint256 public number;
-
     struct Property {
         uint id;
         string propertyAddress;
@@ -13,12 +11,12 @@ contract RentProperty {
 
     struct Contract {
         uint id;
+        address lessor;
+        address lease;
         uint monthlyRent;
         uint deposit;
         uint paymentDue;
         uint gracePeriod;
-        address lessor;
-        address lease;
         uint startDate;
         uint endDate;
         bool isActive;
@@ -35,7 +33,7 @@ contract RentProperty {
     // Contract id => contract payments id => payments
     // payments[contract_id][payments_id]
     mapping(uint => mapping(uint => Payment)) payments;
-    uint contractCount;
+    uint public contractCount = 0;
 
     event RentPaid(
         address lease,
@@ -44,7 +42,41 @@ contract RentProperty {
         uint timestamp
     );
 
-    event ContractTerminated(uint contractId, uint paymentId, address lease, string reason);
+    event ContractTerminated(
+        uint contractId,
+        uint paymentId,
+        address lease,
+        string reason
+    );
+
+    function createRentContract(
+        uint _id,
+        address _lessor,
+        address _lease,
+        uint _monthlyRent,
+        uint _deposit,
+        uint _paymentDue,
+        uint _gracePeriod,
+        uint _startDate,
+        uint _endDate,
+        uint _period
+    ) public {
+        Contract memory _contract = Contract(
+            _id,
+            _lessor,
+            _lease,
+            _monthlyRent,
+            _deposit,
+            _paymentDue,
+            _gracePeriod,
+            _startDate,
+            _endDate,
+            false,
+            _period
+        );
+        contracts[contractCount] = _contract;
+        contractCount++;
+    }
 
     function payRent(uint contractId, uint paymentId) public payable {
         Contract memory _contract = contracts[contractId];
@@ -74,7 +106,11 @@ contract RentProperty {
                 !_payments[i].paid &&
                 block.timestamp > _payments[i].dueDate + _contract.gracePeriod
             ) {
-                terminateContract(contractId, _payments[i].id, "Rent to paid on time");
+                terminateContract(
+                    contractId,
+                    _payments[i].id,
+                    "Rent to paid on time"
+                );
             }
         }
     }
