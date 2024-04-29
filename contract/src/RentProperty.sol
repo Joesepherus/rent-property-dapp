@@ -49,6 +49,13 @@ contract RentProperty {
         string reason
     );
 
+    function getContractById(
+        uint contractId
+    ) public view returns (Contract memory) {
+        Contract memory _contract = contracts[contractId];
+        return _contract;
+    }
+
     function createRentContract(
         uint _id,
         address _lessor,
