@@ -104,7 +104,7 @@ contract RentProperty {
         uint _startDate,
         uint _paymentDue,
         uint _contractId
-    ) public {
+    ) internal {
         for (uint i = 0; i < _period; i++) {
             uint _dueDate = _paymentDue * (i + 1);
             Payment memory _payment = createPayment(i, _startDate + _dueDate);
@@ -115,7 +115,7 @@ contract RentProperty {
     function createPayment(
         uint _id,
         uint _dueDate
-    ) public pure returns (Payment memory) {
+    ) internal pure returns (Payment memory) {
         Payment memory _payment = Payment(_id, _dueDate, false);
         return _payment;
     }
