@@ -25,6 +25,13 @@ contract RentPropertyTest is Test {
             2,
             12
         );
+        vm.prank(leaseAddress);
+        rentProperty.signContract(0);
+
+        vm.prank(lessorAddress);
+        rentProperty.signContract(0);
+
+        vm.deal(leaseAddress, 1000 ether);
     }
 
     function test_CreateRentContract() public view {
@@ -52,13 +59,38 @@ contract RentPropertyTest is Test {
         }
     }
 
-    function test_signContract() public {
+    function test_payRent() public {
+        uint contractId = 0;
+        uint paymentId = 0;
+        payRent(contractId, paymentId);
+        RentProperty.Payment memory _payment = rentProperty
+            .getPaymentsByContractIdAndPaymentId(contractId, paymentId);
+        assertEq(_payment.paid, true);
+    }
+
+    function payRent(uint _contractId, uint _paymentId) private {
+        RentProperty.Contract memory _contract = rentProperty.getContractById(
+            _contractId
+        );
+
         vm.prank(leaseAddress);
-        rentProperty.signContract(0);
+        rentProperty.payRent{value: _contract.monthlyRent}(
+            _contractId,
+            _paymentId
+        );
+    }
+
+    function test_ApproveRentReceived() public {
+        uint contractId = 0;
+        uint paymentId = 0;
+        payRent(contractId, paymentId);
 
         vm.prank(lessorAddress);
-        rentProperty.signContract(0);
-        bool signed = rentProperty.isContractSigned(0);
-        assertEq(signed, true);
+        rentProperty.approveRentReceived(0, 0);
+
+        RentProperty.Payment memory _payment = rentProperty
+            .getPaymentsByContractIdAndPaymentId(0, 0);
+
+        assertEq(_payment.approved, true);
     }
 }
