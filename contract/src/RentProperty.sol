@@ -27,6 +27,7 @@ contract RentProperty {
         uint id;
         uint dueDate;
         bool paid;
+        bool approved;
     }
 
     // contract id => signer address
@@ -119,12 +120,12 @@ contract RentProperty {
         uint _id,
         uint _dueDate
     ) internal pure returns (Payment memory) {
-        Payment memory _payment = Payment(_id, _dueDate, false);
+        Payment memory _payment = Payment(_id, _dueDate, false, false);
         return _payment;
     }
 
     function signContract(uint contractId) public {
-        Contract memory _contract = contracts[contractId];
+        Contract storage _contract = contracts[contractId];
         require(
             _contract.lessor == msg.sender || _contract.lease == msg.sender,
             "Signer has to be either lessor or lease."
@@ -134,6 +135,12 @@ contract RentProperty {
             "Contract is already signed by the signee."
         );
         contractSignatures[contractId][msg.sender] = true;
+        if (
+            contractSignatures[contractId][_contract.lessor] &&
+            contractSignatures[contractId][_contract.lease]
+        ) {
+            _contract.isActive = true;
+        }
     }
 
     function isContractSigned(uint contractId) public view returns (bool) {
@@ -178,6 +185,19 @@ contract RentProperty {
                 );
             }
         }
+    }
+
+    function approveRentReceived(uint contractId, uint paymentId) public {
+        Contract memory _contract = contracts[contractId];
+        require(
+            msg.sender == _contract.lessor,
+            "Only lessor can approve rent being received."
+        );
+
+        Payment storage _payment = payments[contractId][paymentId];
+        require(!_payment.approved, "Payment is already approved.");
+
+        _payment.approved = true;
     }
 
     function terminateContract(
