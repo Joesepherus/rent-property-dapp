@@ -44,7 +44,7 @@ contract RentProperty {
         uint timestamp
     );
 
-    event ContractTerminated(string reason);
+    event ContractTerminated(uint contractId, uint paymentId, address lease, string reason);
 
     function payRent(uint contractId, uint paymentId) public payable {
         Contract memory _contract = contracts[contractId];
@@ -62,7 +62,7 @@ contract RentProperty {
 
     function checkPaymentStatus(uint contractId) public {
         Contract memory _contract = contracts[contractId];
-        Payment memory _payments = payments[contractId];
+        mapping(uint => Payment) storage _payments = payments[contractId];
 
         require(
             msg.sender == _contract.lessor || msg.sender == _contract.lease,
@@ -74,16 +74,19 @@ contract RentProperty {
                 !_payments[i].paid &&
                 block.timestamp > _payments[i].dueDate + _contract.gracePeriod
             ) {
-                terminateContract(_contract, "Rent to paid on time");
+                terminateContract(contractId, _payments[i].id, "Rent to paid on time");
             }
         }
     }
 
     function terminateContract(
-        Contract memory _contract,
+        uint contractId,
+        uint paymentId,
         string memory reason
     ) internal {
+        Contract memory _contract = contracts[contractId];
+
         _contract.isActive = false;
-        emit ContractTerminated(reason);
+        emit ContractTerminated(contractId, paymentId, _contract.lease, reason);
     }
 }
