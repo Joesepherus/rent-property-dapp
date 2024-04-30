@@ -3,7 +3,7 @@ body {
   display: flex;
   font-family: "Muli", sans-serif;
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
   background: linear-gradient(to bottom, #BDBFDB, #53599A);
   margin: 0px;
 }

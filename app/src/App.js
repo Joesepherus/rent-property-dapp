@@ -14,10 +14,12 @@ function App() {
   const [newProperty, setNewProperty] = useState();
   const [newRentContract, setNewRentContract] = useState();
   const [contractId, setContractId] = useState();
+  const [propertyId, setPropertyId] = useState();
   const [contract, setContract] = useState();
+  const [property, setProperty] = useState();
 
   const setValue = (setter) => (evt) => setter(evt.target.value);
-  const setProperty = (name) => (evt) =>
+  const _setNewProperty = (name) => (evt) =>
     setNewProperty({ ...newProperty, [name]: evt.target.value });
   const setRentContract = (name) => (evt) =>
     setNewRentContract({ ...newRentContract, [name]: evt.target.value });
@@ -95,12 +97,17 @@ function App() {
   }
 
   async function getContractById() {
-    const _contract = await contractWithSigner.getContractById(
-      contractId
-    );
-    console.log('_contract: ', _contract);
-    setContract(_contract)
+    const _contract = await contractWithSigner.getContractById(contractId);
+    console.log("_contract: ", _contract);
+    setContract(_contract);
   }
+
+  async function getPropertyById() {
+    const _property = await contractWithSigner.getPropertyById(propertyId);
+    console.log("_property: ", _property);
+    setProperty(_property);
+  }
+  
 
   return (
     <div className="appContainer">
@@ -125,7 +132,7 @@ function App() {
               type="text"
               id="id"
               value={newProperty?.id}
-              onChange={setProperty("id")}
+              onChange={_setNewProperty("id")}
             />
           </label>
 
@@ -135,7 +142,7 @@ function App() {
               type="text"
               id="propertyAddress"
               value={newProperty?.propertyAddress}
-              onChange={setProperty("propertyAddress")}
+              onChange={_setNewProperty("propertyAddress")}
             />
           </label>
 
@@ -145,7 +152,7 @@ function App() {
               type="text"
               id="city"
               value={newProperty?.city}
-              onChange={setProperty("city")}
+              onChange={_setNewProperty("city")}
             />
           </label>
 
@@ -155,7 +162,7 @@ function App() {
               type="text"
               id="country"
               value={newProperty?.country}
-              onChange={setProperty("country")}
+              onChange={_setNewProperty("country")}
             />
           </label>
 
@@ -165,7 +172,7 @@ function App() {
               type="text"
               id="description"
               value={newProperty?.description}
-              onChange={setProperty("description")}
+              onChange={_setNewProperty("description")}
             />
           </label>
 
@@ -304,6 +311,39 @@ function App() {
         </div>
 
         <div className="contract">
+          <h2>Get property by ID</h2>
+          <label>
+            Property ID
+            <input
+              type="text"
+              id="propertyId"
+              value={propertyId}
+              onChange={setValue(setPropertyId)}
+            />
+          </label>
+
+          <div
+            className="button"
+            onClick={(e) => {
+              e.preventDefault();
+              getPropertyById();
+            }}
+          >
+            Get Property
+          </div>
+
+          {property ? (
+            <div>
+              <div>ID: {parseInt(property.id._hex)}</div>
+              <div>Address: {property.propertyAddress}</div>
+              <div>City: {property.city}</div>
+              <div>Country: {property.country}</div>
+              <div>Description: {property.description}</div>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="contract">
           <h2>Get contract by ID</h2>
           <label>
             Contract ID
@@ -325,14 +365,18 @@ function App() {
             Get Contract
           </div>
 
-          {contract ? <div>
-            <div>ID: {parseInt(contract.id._hex)}</div>
-            <div>Lessor: {contract.lessor}</div>
-            <div>Lease: {contract.lease}</div>
-            <div>Monthly rent: {parseInt(contract.monthlyRent._hex)}</div>
-            <div>Period: {parseInt(contract.period._hex)}</div>
-          </div>:null}
+          {contract ? (
+            <div>
+              <div>ID: {parseInt(contract.id._hex)}</div>
+              <div>Lessor: {contract.lessor}</div>
+              <div>Lease: {contract.lease}</div>
+              <div>Monthly rent: {parseInt(contract.monthlyRent._hex)}</div>
+              <div>Period: {parseInt(contract.period._hex)}</div>
+            </div>
+          ) : null}
         </div>
+
+     
       </div>
     </div>
   );
