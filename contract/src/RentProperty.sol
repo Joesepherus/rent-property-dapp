@@ -97,6 +97,10 @@ contract RentProperty {
         uint propertyId
     ) public {
         Property storage property = properties[propertyId];
+        require(
+            property.owner != address(0),
+            "Property with that ID doesnt exist."
+        );
 
         Contract memory _contract = Contract(
             _id,
