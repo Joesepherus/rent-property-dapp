@@ -177,10 +177,13 @@ contract RentProperty {
 
     function payRent(uint contractId, uint paymentId) public payable {
         Contract memory _contract = contracts[contractId];
+        Payment memory _payment = payments[contractId][paymentId];
 
         require(msg.sender == _contract.lease, "Only lease can pay rent.");
         require(_contract.isActive, "Contract is not active.");
         require(msg.value == _contract.monthlyRent, "Incorrect rent value.");
+        require(msg.value == _contract.monthlyRent, "Incorrect rent value.");
+        require(!_payment.paid, "This payment has already been paid for.");
 
         (bool sent, ) = _contract.lessor.call{value: msg.value}("");
         require(sent, "Failed to send rent.");
