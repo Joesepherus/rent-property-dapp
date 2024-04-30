@@ -46,8 +46,8 @@ interact with the react app using metamask on http://localhost:3000
 <div>✅ define events</div>
 <div>✅ listPropertyForRent</div>
 <div>✅ signRentContract</div>
-<div>sendDeposit</div>
-<div>approveDepositReceived</div>
+<div>sendDeposit - Didn't add this one because it's basically the same as payRent where lease would pay it and then lessor would approve that he received the payment</div>
+<div>approveDepositReceived - Didn't add this one because it's basically the same as payRent where lease would pay it and then lessor would approve that he received the payment</div>
 <div>✅ payRent</div>
 <div>✅ approveRentReceived</div>
 
