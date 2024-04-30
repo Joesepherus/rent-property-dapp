@@ -147,7 +147,7 @@ function App() {
     <div className="appContainer">
       <h1>Rent Property dApp</h1>
       <h2>What's this dApp about?</h2>
-      <div className="description">add later</div>
+      <div className="description">This dApp tries to show how Renting a Property can be done using a Smart Contract. In this dApp you're able to list a property for rent, get any property details, create a contract between a lessor and a lease, get any contract details, sign the contract on both sides, pay rent by lease, approve that rent has been received by lessor.</div>
       <div className="contractContainer">
         <div className="contract">
           <h2>Properties</h2>
