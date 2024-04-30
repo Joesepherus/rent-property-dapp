@@ -17,12 +17,20 @@ function App() {
   const [propertyId, setPropertyId] = useState();
   const [contract, setContract] = useState();
   const [property, setProperty] = useState();
+  const [signContractId, setSignContractId] = useState();
+  const [payRentObject, setPayRentObject] = useState();
+  const [approveRent, setApproveRent] = useState();
 
   const setValue = (setter) => (evt) => setter(evt.target.value);
   const _setNewProperty = (name) => (evt) =>
     setNewProperty({ ...newProperty, [name]: evt.target.value });
   const setRentContract = (name) => (evt) =>
     setNewRentContract({ ...newRentContract, [name]: evt.target.value });
+  const _setPayRentObject = (name) => (evt) =>
+    setPayRentObject({ ...payRentObject, [name]: evt.target.value });
+
+  const _setApproveRent = (name) => (evt) =>
+    setApproveRent({ ...approveRent, [name]: evt.target.value });
 
   useEffect(() => {
     async function getSinger() {
@@ -99,7 +107,13 @@ function App() {
   async function getContractById() {
     const _contract = await contractWithSigner.getContractById(contractId);
     console.log("_contract: ", _contract);
-    setContract(_contract);
+    const payments = [];
+    for (let i = 0; i < _contract.period; i++) {
+      const _payment = await contractWithSigner.payments(contractId, i);
+      console.log("_payment: ", _payment);
+      payments.push(_payment);
+    }
+    setContract({ ..._contract, payments: payments });
   }
 
   async function getPropertyById() {
@@ -107,7 +121,27 @@ function App() {
     console.log("_property: ", _property);
     setProperty(_property);
   }
-  
+
+  async function signContract() {
+    await contractWithSigner.signContract(signContractId);
+  }
+
+  async function payRent() {
+    console.log("payRentObject: ", payRentObject);
+    await contractWithSigner.payRent(
+      payRentObject.contractId,
+      payRentObject.paymentId,
+      { value: payRentObject.value }
+    );
+  }
+
+  async function approveRentReceived() {
+    console.log("approveRent: ", approveRent);
+    await contractWithSigner.approveRentReceived(
+      approveRent.contractId,
+      approveRent.paymentId
+    );
+  }
 
   return (
     <div className="appContainer">
@@ -116,12 +150,12 @@ function App() {
       <div className="description">add later</div>
       <div className="contractContainer">
         <div className="contract">
-          <h2>Contracts</h2>
-          <div>Contracts count: {contractCount}</div>
-        </div>
-        <div className="contract">
           <h2>Properties</h2>
           <div>Properties count: {propertiesCount}</div>
+        </div>
+        <div className="contract">
+          <h2>Contracts</h2>
+          <div>Contracts count: {contractCount}</div>
         </div>
 
         <div className="contract">
@@ -183,7 +217,7 @@ function App() {
               listProperty();
             }}
           >
-            Add funds
+            List property
           </div>
         </div>
 
@@ -306,7 +340,7 @@ function App() {
               createRentContract();
             }}
           >
-            Add funds
+            Create Contract
           </div>
         </div>
 
@@ -372,11 +406,119 @@ function App() {
               <div>Lease: {contract.lease}</div>
               <div>Monthly rent: {parseInt(contract.monthlyRent._hex)}</div>
               <div>Period: {parseInt(contract.period._hex)}</div>
+              <div>Active: {contract.isActive ? "Yes" : "No"}</div>
+              <h3>Payments</h3>
+              {contract.payments
+                ? contract.payments.map((payment) => (
+                    <div>
+                      <div>ID: {parseInt(payment.id._hex)}</div>
+                      <div>Paid: {payment.paid? 'Yes' : 'No'}</div>
+                      <div>Approved: {payment.approved? 'Yes' : 'No'}</div>
+                    </div>
+                  ))
+                : null}
             </div>
           ) : null}
         </div>
 
-     
+        <div className="contract">
+          <h2>Sign Contract</h2>
+          <label>
+            Contract ID
+            <input
+              type="text"
+              id="signContractId"
+              value={signContractId}
+              onChange={setValue(setSignContractId)}
+            />
+          </label>
+
+          <div
+            className="button"
+            onClick={(e) => {
+              e.preventDefault();
+              signContract();
+            }}
+          >
+            Sign Contract
+          </div>
+        </div>
+
+        <div className="contract">
+          <h2>Pay Rent</h2>
+          <label>
+            Contract ID
+            <input
+              type="text"
+              id="contractId"
+              value={payRentObject?.contractId}
+              onChange={_setPayRentObject("contractId")}
+            />
+          </label>
+
+          <label>
+            Payment ID
+            <input
+              type="text"
+              id="paymentId"
+              value={payRentObject?.paymentId}
+              onChange={_setPayRentObject("paymentId")}
+            />
+          </label>
+
+          <label>
+            Value
+            <input
+              type="text"
+              id="value"
+              value={payRentObject?.value}
+              onChange={_setPayRentObject("value")}
+            />
+          </label>
+
+          <div
+            className="button"
+            onClick={(e) => {
+              e.preventDefault();
+              payRent();
+            }}
+          >
+            Pay Rent
+          </div>
+        </div>
+
+        <div className="contract">
+          <h2>Approve Rent Received</h2>
+          <label>
+            Contract ID
+            <input
+              type="text"
+              id="contractId"
+              value={approveRent?.contractId}
+              onChange={_setApproveRent("contractId")}
+            />
+          </label>
+
+          <label>
+            Payment ID
+            <input
+              type="text"
+              id="paymentId"
+              value={approveRent?.paymentId}
+              onChange={_setApproveRent("paymentId")}
+            />
+          </label>
+
+          <div
+            className="button"
+            onClick={(e) => {
+              e.preventDefault();
+              approveRentReceived();
+            }}
+          >
+            Approve Rent Received
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -42,7 +42,7 @@ contract RentProperty {
     mapping(uint => Contract) public contracts;
     // Contract id => contract payments id => payments
     // payments[contract_id][payments_id]
-    mapping(uint => mapping(uint => Payment)) payments;
+    mapping(uint => mapping(uint => Payment)) public payments;
     uint public contractCount = 0;
 
     event RentPaid(
