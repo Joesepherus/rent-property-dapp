@@ -13,6 +13,8 @@ function App() {
   const [propertiesCount, setPropertiesCount] = useState();
   const [newProperty, setNewProperty] = useState();
   const [newRentContract, setNewRentContract] = useState();
+  const [contractId, setContractId] = useState();
+  const [contract, setContract] = useState();
 
   const setValue = (setter) => (evt) => setter(evt.target.value);
   const setProperty = (name) => (evt) =>
@@ -31,12 +33,12 @@ function App() {
     getSinger();
   }, [account]);
 
-  const contract = new ethers.Contract(
+  const RentPropertyContract = new ethers.Contract(
     CONTRACT_ADDRESS,
     RentProperty.abi,
     provider
   );
-  const contractWithSigner = contract.connect(signer);
+  const contractWithSigner = RentPropertyContract.connect(signer);
 
   async function getContractCount() {
     const _contractCount = parseInt(
@@ -76,7 +78,7 @@ function App() {
   }
 
   async function createRentContract() {
-    console.log('newRentContract: ', newRentContract);
+    console.log("newRentContract: ", newRentContract);
     const property = await contractWithSigner.createRentContract(
       newRentContract.id,
       newRentContract.lessor,
@@ -90,6 +92,14 @@ function App() {
       newRentContract.period,
       newRentContract.propertyId
     );
+  }
+
+  async function getContractById() {
+    const _contract = await contractWithSigner.getContractById(
+      contractId
+    );
+    console.log('_contract: ', _contract);
+    setContract(_contract)
   }
 
   return (
@@ -291,6 +301,37 @@ function App() {
           >
             Add funds
           </div>
+        </div>
+
+        <div className="contract">
+          <h2>Get contract by ID</h2>
+          <label>
+            Contract ID
+            <input
+              type="text"
+              id="contractId"
+              value={contractId}
+              onChange={setValue(setContractId)}
+            />
+          </label>
+
+          <div
+            className="button"
+            onClick={(e) => {
+              e.preventDefault();
+              getContractById();
+            }}
+          >
+            Get Contract
+          </div>
+
+          {contract ? <div>
+            <div>ID: {parseInt(contract.id._hex)}</div>
+            <div>Lessor: {contract.lessor}</div>
+            <div>Lease: {contract.lease}</div>
+            <div>Monthly rent: {parseInt(contract.monthlyRent._hex)}</div>
+            <div>Period: {parseInt(contract.period._hex)}</div>
+          </div>:null}
         </div>
       </div>
     </div>
